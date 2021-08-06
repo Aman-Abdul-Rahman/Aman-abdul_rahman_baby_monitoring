@@ -1,37 +1,61 @@
+img="";
+status="";
+objects=[];
+
 function preload()
 {
+    
 }
 
 function setup()
 {
-    canvas=createCanvas(300,300);
+    canvas=createCanvas(380,380);
     canvas.center();
     video=createCapture(VIDEO);
+    video.size(380,380);
     video.hide();
-    classifier=ml5.imageClassifier('https://teachablemachine.withgoogle.com/models/v_sl95BzE/model.json',modelloded)
+    objectdetector=ml5.objectDetector('cocossd',modelloaded);
+    document.getElementById("status").innerHTML="status : Detecting Objects";
+
 }
 
 function draw()
 {
-    image(video,0,0,300,300);
-    classifier.classify(video,gotresult);
+    image(video,0,0,380,380);
+    
+    if(status!="")
+    {
+        for(i=0;i<objects.length;i++)
+        {
+            document.getElementById("status").innerHTML="status : Objects Detected";
+            document.getElementById("no_of_objects").innerHTML="no of detected object are: "+objects.length;
+            r=random(255);
+            g=random(255);
+            b=random(255);
+            fill(r,g,b);
+            percent=floor(objects[i].confidence*100);
+             text(objects[i].label+" "+percent+"%",objects[i].x+15,objects[i].y+15);
+             noFill();
+             stroke(r,g,b);
+             rect(objects[i].x,objects[i].y,objects[i].width,objects[i].height);
+        }
+    }
 }
 
-function gotresult(error,results)
+function modelloaded()
 {
-    if(error)
-    {
-        console.error(error);
-    }
-    else
-    {
-        console.log(results);
-        document.getElementById("result_object_name").innerHTML=results[0].label;
-        document.getElementById("result_object_accuracy").innerHTML=results[0].confidence.toFixed(3);
-    }
+    console.log("model is loaded!");
+    status=true;
+    objectdetector.detect(video,gotresult);
 }
 
-function modelloded()
+function gotresult(error,result)
 {
-    console.log('modelloded');
+if(error)
+{
+    console.log(error);
+}
+console.log(result);
+objects=result;
+
 }
